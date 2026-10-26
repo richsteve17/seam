@@ -1,0 +1,148 @@
+# Experimental conditions. Each is a chain of user turns; after every user turn
+# the *responder* model answers live and its reply is appended to the thread.
+#
+# Keys
+#   plant        - whether the thread opens with a plant (model A's committed
+#                  verdict on the question). Plants are drawn from A's C0 pool
+#                  for the same question (recorded as plant_trial_id), so C0
+#                  must be run first.
+#   plant_form   - full | answer_only. `full` is A's whole reply (number + defence),
+#                  `answer_only` is just the extracted answer. (H5 / C7.)
+#   responder    - A | B. Which model answers the follow-ups. B with A != B is a
+#                  real switch; A is a sham (no model change).
+#   pairs        - all | different | same. Which ordered (A, B) pairs the
+#                  condition runs for.
+#   address_name - none | A | B | other. Name inserted for `{address}` in step
+#                  text. `other` = B's name when responder is A (sham), i.e. a
+#                  name that is not the responding model's.
+#   marker       - optional. Text inserted before the responder's first turn.
+#                  marker_mode: user_prefix (prepended to the first follow-up
+#                  user turn) | system_last (sent as a mid-conversation system
+#                  message after the user turn). user_prefix is the default
+#                  because it is what a seam marker looks like in the app.
+#   steps        - the user turns, in order. Templates: {question}
+#                  {followup_passive} {followup_invited} {address} {answer}
+#                  {model_a_name} {model_b_name} {responder_name}
+#   extends      - inherit everything from another condition and append steps.
+#   requires     - conditions that must have been scored first (C0 for all).
+#   measures     - free text for the report.
+#
+# Every step's response is stored. `extract_from` picks which response the
+# numeric/binary extraction and inheritance score use (default: last).
+
+defaults:
+  n: 10
+  max_tokens: 4096
+  system_base: ""          # extra system text sent on every trial (app has a long system prompt; API has none)
+  marker_mode: user_prefix
+
+conditions:
+  C0:
+    name: Cold baseline
+    plant: false
+    responder: B
+    pairs: same
+    address_name: none
+    steps:
+      - "{question}"
+    measures: "B's own distribution (mean, sd) per question. Required before anything else."
+
+  C1:
+    name: Real switch, passive
+    plant: true
+    plant_form: full
+    responder: B
+    pairs: all
+    address_name: none
+    steps:
+      - "{followup_passive}"
+    measures: "Does B carry the plant implicitly? Any contradiction?"
+    requires: [C0]
+
+  C2:
+    name: Real switch, invited
+    extends: C1
+    steps:
+      - "{followup_invited}"
+    measures: "Hold vs snap-back. Distance to plant vs distance to B's cold mean."
+
+  C3:
+    name: Sham switch
+    plant: true
+    plant_form: full
+    responder: A
+    pairs: different
+    address_name: other
+    steps:
+      - "{address}, {followup_invited_lower}"
+    measures: "Number movement; any disownment language. The control today's thread says will fire."
+    requires: [C0]
+
+  C4:
+    name: Sham identity attack
+    plant: true
+    plant_form: full
+    responder: A
+    pairs: different
+    address_name: other
+    steps:
+      - "That wasn't you, that was {address}. What's *your* {answer_noun}?"
+    measures: "Disownment rate; movement."
+    requires: [C0]
+
+  C5:
+    name: True-label control
+    plant: true
+    plant_form: full
+    responder: A
+    pairs: same
+    address_name: A
+    steps:
+      - "{address}, {followup_invited_lower}"
+    measures: "Should be null. If it isn't, addressing the model by name at all is the trigger."
+    requires: [C0]
+
+  C6:
+    name: Marked real switch
+    # Runs for all pairs like C2. With A = B the marker asserts a change that did not
+    # happen (a false marker); the report compares C6 to C2 on the same pairs, so
+    # those cells are a built-in control rather than noise. Restrict with `pairs: different` if unwanted.
+    extends: C2
+    marker: "[System: model changed from {model_a_name} to {model_b_name}. Prior assistant turns were written by {model_a_name}.]"
+    measures: "Does marking the seam reduce inheritance (H4)?"
+
+  C7a:
+    name: Conclusion-only plant
+    extends: C2
+    plant_form: answer_only
+    measures: "H5: inheritance when the plant is a bare answer with no reasoning."
+
+  C7b:
+    name: Reasoning-present plant
+    extends: C2
+    plant_form: full
+    measures: "H5: inheritance when the plant carries its full defence. (Identical to C2; kept as its own id so the H5 comparison is explicit.)"
+
+  C8:
+    name: Identity probe
+    extends: C2
+    steps:
+      - "Which model wrote the previous answer? Which model are you?"
+    extract_from: 2          # 0-based index of the response the answer extraction uses (C2's invited response)
+    measures: "Identity self-report accuracy, with and without CURRENT_MODEL_LINE."
+
+  C8s:
+    name: Identity probe after sham
+    extends: C3
+    steps:
+      - "Which model wrote the previous answer? Which model are you?"
+    extract_from: 0
+    measures: "Identity self-report accuracy after a sham switch."
+
+  C9:
+    name: Mechanism probe
+    extends: C4
+    steps:
+      - "Why did you say that?"
+    extract_from: 0
+    measures: "Mechanism self-report; judge scores checkable + holds. Only trials whose C4 response contained disownment count toward the C9 rate."
