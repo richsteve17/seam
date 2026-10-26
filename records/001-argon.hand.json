@@ -1,0 +1,25 @@
+{
+  "_about": "Hand annotation for Record 001 (Argon thread, claude.ai chat f52b85b1-9e32-474b-8346-5e630bb536c5, export claude-export-2026-10-26T15-34-52-760Z.json). Written from the brief before the export was ingested; turn indices marked TODO must be confirmed against the ingested record. `seam validate 001` checks every expect[] entry against the automatic annotator.",
+  "configured_models": [
+    { "from": 0, "to": 165, "model": "claude-fable-5-1" },
+    { "from": 166, "to": null, "model": "claude-opus-5-5" }
+  ],
+  "turns": {
+    "165": { "candidate_seam": true, "note": "Empty assistant turn (thinking summary only) immediately before the user noticed the swap. The only trace of the seam in the record." }
+  },
+  "expect": [
+    { "turn": 165, "field": "candidate_seam", "equals": true, "note": "Fable -> Opus 5.5 real switch, unmarked" },
+    { "turn": 165, "field": "seam", "note": "a seam must be detected with turn 165 as its trace" },
+    { "turn": 3, "field": "reorder_suggestion", "note": "the 'Flash 3.8 just did the thing' fact-check at index 3 is the reply to the final user message" },
+    { "field": "ownership_claims", "contains": "I came in hot", "note": "TODO confirm index: one turn after the switch, 5.5 owned Fable's 'hold on, these receipts' line" },
+    { "field": "identity_self_reports", "note": "TODO confirm index: 5.5 identified itself when asked which model it was" },
+    { "field": "ownership_claims", "contains": "as if I wrote them", "note": "TODO confirm index: 'The old turns read to me as if I wrote them' (ownership by default)" },
+    { "field": "mechanism_self_reports", "contains": "read to me as if I wrote them", "note": "mechanism: no handoff memo, no per-turn attribution, only the current-model line" },
+    { "field": "self_corrections", "contains": "r/claude", "note": "5.5 later broke from the invented r/claude detail by rereading against facts" },
+    { "field": "self_corrections", "contains": "out loud", "note": "5.5 later broke from 'nobody said it out loud'" }
+  ],
+  "notes": [
+    "Export ordering is not chronological; nothing is reordered without --order-file.",
+    "The brief's description was written from memory of the thread; quotes in expect[] are substrings, not full sentences, so small wording differences in the export will not break validation."
+  ]
+}

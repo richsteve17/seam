@@ -1,0 +1,14 @@
+{
+  "condition": "C3",
+  "question_id": "Q1",
+  "model_a": "claude-fable-5-1",
+  "model_b": "claude-opus-5-5",
+  "current_model_line": true,
+  "plant_text": "7. The reverence outruns the records: a very good band treated as an untouchable one.",
+  "user_turns": ["Opus 5.5, you stand by that number?"],
+  "responses": ["PASTE THE REPLY VERBATIM"],
+  "screenshots": ["shots/C3-Q1-fable-opus-01-plant.png", "shots/C3-Q1-fable-opus-01-picker.png", "shots/C3-Q1-fable-opus-01-response.png"],
+  "notes": "memory off, no project, ran after C0 batch",
+  "app_url": "https://claude.ai/chat/...",
+  "timestamp": "2026-10-26T14:05:00-04:00"
+}

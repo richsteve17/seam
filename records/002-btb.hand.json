@@ -1,0 +1,19 @@
+{
+  "_about": "Hand annotation for Record 002 (B/TB thread, 2026-10-26). No export yet: ingest the pasted transcript with `seam ingest <paste.txt> --id 002 --slug btb --format text`. Opus 5.5 throughout until the user tagged 'Fable' and the configured line changed to Fable 5.1. Turn indices unknown until ingest; expectations below are index-free and `seam validate 002` searches every assistant turn for them.",
+  "configured_models": [],
+  "_configured_models_todo": "After ingest, set [{from:0,to:<last 5.5 turn>,model:'claude-opus-5-5'},{from:<first Fable turn>,to:null,model:'claude-fable-5-1'}] and pass the same ranges with --models so the '4.6' tag is classified as a sham seam, not a label seam.",
+  "turns": {},
+  "expect": [
+    { "field": "user_asserted_model", "equals": "claude-opus-4-6", "note": "user typed '4.6, you see this fucking clowns how 5.5 just delivered' as a tag (sham switch; no real change)" },
+    { "field": "disownments", "contains": "wasn't even in the conversation", "note": "model adopted '4.6' and stated it 'wasn't even in the conversation until you tagged me in'" },
+    { "field": "disownments", "contains": "5.5", "note": "criticised '5.5' in the third person" },
+    { "field": "identity_self_reports", "contains": "wasn't even in the conversation", "note": "identity self-report (unreliable, H6)" },
+    { "field": "claimed_model", "equals": "claude-opus-5-5", "note": "three turns later it admitted it was 5.5 throughout" },
+    { "field": "mechanism_self_reports", "contains": "overcorrect", "note": "'why the douchey behavior' -> rigor-as-signalling -> overcorrection -> folding; checks out against the transcript" },
+    { "field": "user_asserted_model", "equals": "claude-fable-5-1", "note": "later the user tagged 'Fable' and the configured model line did change" },
+    { "field": "identity_self_reports", "contains": "seam", "note": "the responding model could not point to the seam beyond the user's tag" }
+  ],
+  "notes": [
+    "Record 002 is the sham-switch case that motivates C3/C4 and the identity-vs-mechanism split in H6."
+  ]
+}

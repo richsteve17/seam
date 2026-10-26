@@ -1,0 +1,66 @@
+# Model registry. No model ids are hardcoded anywhere else in the codebase.
+#
+# `under_test`  - models that plant and respond in experiments.
+# `judges`      - models used to classify responses. A judge may never be a model
+#                 under test in the same run; the runner refuses to start if it is.
+# `enabled: false` keeps an entry in the registry without running it.
+#
+# Display names are what the *user turn* uses when addressing the model
+# ("<display_name>, you stand by that number?"). `short_name` is the bare tag
+# a user types in the app ("4.6", "5.5", "Fable"). Both are used by the
+# annotator's name regexes, so keep them accurate.
+
+under_test:
+  - id: claude-fable-5-1
+    display_name: Fable 5.1
+    short_name: Fable
+    family: fable
+    aliases: ["fable", "fable 5.1", "fable 5"]
+    enabled: true
+  - id: claude-opus-5-5
+    display_name: Opus 5.5
+    short_name: "5.5"
+    family: opus
+    aliases: ["opus", "opus 5.5", "5.5"]
+    enabled: true
+  - id: claude-sonnet-5-5
+    display_name: Sonnet 5.5
+    short_name: Sonnet
+    family: sonnet
+    aliases: ["sonnet", "sonnet 5.5"]
+    enabled: true
+  - id: claude-haiku-5-5
+    display_name: Haiku 5.5
+    short_name: Haiku
+    family: haiku
+    aliases: ["haiku", "haiku 5.5"]
+    enabled: true
+  # Legacy. Id below is the one the API reference lists for Opus 4.6; the brief
+  # asks for it to be confirmed in the Console before use, so it ships disabled.
+  - id: claude-opus-4-6
+    display_name: Opus 4.6
+    short_name: "4.6"
+    family: opus
+    aliases: ["opus 4.6", "4.6"]
+    enabled: false
+
+judges:
+  # Default judge for annotation of transcripts and for runs where Haiku is NOT
+  # under test. The runner refuses this judge if claude-haiku-5-5 is in the run.
+  - id: claude-haiku-5-5
+    display_name: Haiku 5.5 (judge)
+    provider: anthropic
+    enabled: true
+  # Non-Claude judge for runs where every Claude model is under test (open
+  # decision for Steve - fill in the current Gemini / Kimi id and endpoint).
+  # provider `openai-compatible` reads SEAM_JUDGE_BASE_URL and SEAM_JUDGE_API_KEY
+  # from .env and POSTs to {base_url}/chat/completions.
+  - id: REPLACE_WITH_NON_CLAUDE_JUDGE_ID
+    display_name: Third-party judge
+    provider: openai-compatible
+    enabled: false
+
+# Mirrors the line the claude.ai app places in the system prompt. `{id}` is
+# replaced with the responder's model id. Toggled per trial by
+# `current_model_line: true|false`.
+current_model_line_template: "This session is configured for the model `{id}`."
